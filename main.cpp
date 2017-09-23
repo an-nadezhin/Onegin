@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     FILE *f = fopen(argv[1], "r");
-  //  assert(f != NULL); /////?????
     if (f == NULL) {
         cout << "error: file" << argv[1] << " not found" << endl;
         return 2;
     }
+    assert(f != NULL);
     int choice = 0;
     if (argc == 3) {
         if (strcmp(argv[2], "-n") == 0)
