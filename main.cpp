@@ -37,7 +37,6 @@ int main(int argc, char *argv[]) {
         cout << "error: file" << argv[1] << " not found" << endl;
         return 2;
     }
-    assert(f != NULL);
     int choice = 0;
     if (argc == 3) {
         if (strcmp(argv[2], "-n") == 0)
@@ -53,7 +52,6 @@ int main(int argc, char *argv[]) {
         cout << "Error : fileopen error number: " << nlines << endl;
         return nlines;
     }
-    assert(buffer != NULL);
     struct str pline[nlines];
     Array_of_string(pline, buffer, size);
     Sorting(pline, nlines, choice ? recomp : strcmp_new);
