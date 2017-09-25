@@ -33,10 +33,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     FILE *f = fopen(argv[1], "r");
+
     if (f == NULL) {
         cout << "error: file" << argv[1] << " not found" << endl;
         return 2;
     }
+    assert(f != NULL);
     int choice = 0;
     if (argc == 3) {
         if (strcmp(argv[2], "-n") == 0)
@@ -52,12 +54,28 @@ int main(int argc, char *argv[]) {
         cout << "Error : fileopen error number: " << nlines << endl;
         return nlines;
     }
+    assert(buffer != NULL);
     struct str pline[nlines];
     Array_of_string(pline, buffer, size);
     Sorting(pline, nlines, choice ? recomp : strcmp_new);
     File_Output(nlines, pline, "output.txt");
     return 0;
 }
+
+//---------------------------------------------------------
+//! Reading a file into the array of string
+//!
+//! @param [in] f f-text file
+//! @param [out] buffer pointer to the array of string
+//! @param [out] size pointer to the size of file
+//!
+//! @return amount of lines
+//!
+//! @note in case of error return code of mistakes
+//!
+//!
+//---------------------------------------------------------
+
 
 int File_Open(FILE *f, char **buffer, long *size) {
     fseek(f, 0, SEEK_END);
@@ -80,6 +98,16 @@ int File_Open(FILE *f, char **buffer, long *size) {
     return nlines;
 }
 
+//---------------------------------------------------------
+//! counting amount of string
+//!
+//! @param [in] size size of file
+//! @param [out] buffer pointer to the array of string
+//!
+//! @return amount of lines
+//!
+//---------------------------------------------------------
+
 
 int Amount_of_string(char *buffer, long size) {
     int memory = 0;
@@ -88,6 +116,18 @@ int Amount_of_string(char *buffer, long size) {
             memory++;
     return memory;
 }
+
+//------------------------------------------------------------
+//!function which make pointer on the string and create array of this pointer
+//!
+//! @param [out] pline array of pointers on structures
+//! @param [in] buffer array of string
+//! @param [in] size size of file
+//!
+//! return nothing
+//!
+//------------------------------------------------------------
+
 
 void Array_of_string(struct str pline[], char *buffer, long size) {
     int pos = 0;
