@@ -157,6 +157,16 @@ void Array_of_string(struct str pline[], char *buffer, long size) {
     }
 }
 
+//-------------------------------------------------------------------------
+//! sorting
+//!
+//! @param [out] pline array of pointer on structures
+//! @param [in] nlines amount of strings
+//! @param [in] compare pointer on function which choose methods of sorting
+//!
+//! @return nothing
+//!
+//-------------------------------------------------------------------------
 
 void Sorting(struct str pline[], int nlines, int (*compare)(const struct str *pline1, const struct str *pline2)) {
     for (int i = 1; i <= nlines - 1; i++) {
@@ -169,6 +179,16 @@ void Sorting(struct str pline[], int nlines, int (*compare)(const struct str *pl
         }
     }
 }
+
+//-------------------------------------------------------------------
+//! function which sort strings from end to begin
+//!
+//! @param [in]pline1 pointer on the first string which we compare
+//! @param [in]pline2 pointer on the second string which we compare
+//!
+//! @return return 1 if string1 > string2; -1 if string2 > string1; 0 if string1 = string 2;
+//!
+//-------------------------------------------------------------------
 
 int recomp(const struct str *pline1, const struct str *pline2) {
     int l1 = pline1->len - 1;
@@ -190,9 +210,31 @@ int recomp(const struct str *pline1, const struct str *pline2) {
         return -1;
 }
 
+//-------------------------------------------------------------------
+//! function which sort strings from begin to end
+//!
+//! @param [in] pline1 pointer on the first string which we compare
+//! @param [in] pline2 pointer on the second string which we compare
+//!
+//! @return return 1 if string1 > string2; -1 if string2 > string1; 0 if string1 = string 2;
+//!
+//-------------------------------------------------------------------
+
 int strcmp_new(const struct str *pline1, const struct str *pline2) {
     return strcmp(pline1->str, pline2->str);
 }
+
+
+//-------------------------------------------------------------------------
+//!function which return result of sorting in file
+//!
+//! @param [in] nlines amount of string
+//! @param [in]pline
+//! @param [in]filename
+//!
+//! return file with sorted text
+//!
+//------------------------------------------------------------------------
 
 
 void File_Output(int nlines, struct str pline[], const char *filename) {
