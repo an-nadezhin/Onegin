@@ -3,19 +3,18 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctype.h>
-#include <cassert>
 
 using namespace std;
 
-int File_Open(FILE *f, char **buffer, long *size);
+int File_Open(FILE *f, char *buffer, long *size);
 
-int Amount_of_string(char *buffer, long size);
+int Amount_of_string(const char *buffer, const long size);
 
-void Array_of_string(struct str pline[], char *buffer, long size);
+void Array_of_string(struct str pline[], char *buffer, const long *size);
 
-void File_Output(int nlines, struct str pline[], const char *filename);
+void File_Output(const int *nlines, struct str pline[], const char *filename);
 
-void Sorting(struct str pline[], int nlines, int (*compare)(const struct str *pline1, const struct str *pline2));
+void Sorting(struct str pline[], const int *nlines, int (*compare)(const struct str *pline1, const struct str *pline2));
 
 int recomp(const struct str *pline1, const struct str *pline2);
 
@@ -38,7 +37,6 @@ int main(int argc, char *argv[]) {
         cout << "error: file" << argv[1] << " not found" << endl;
         return 2;
     }
-    assert(f != NULL);
     int choice = 0;
     if (argc == 3) {
         if (strcmp(argv[2], "-n") == 0)
@@ -49,40 +47,39 @@ int main(int argc, char *argv[]) {
     int nlines = 0;
     char *buffer = NULL;
     long size = 0;
-    nlines = File_Open(f, &buffer, &size);
+    nlines = File_Open(f, buffer, &size);
     if (nlines < 0) {
         cout << "Error : fileopen error number: " << nlines << endl;
         return nlines;
     }
-    assert(buffer != NULL);
     struct str pline[nlines];
-    Array_of_string(pline, buffer, size);
-    Sorting(pline, nlines, choice ? recomp : strcmp_new);
-    File_Output(nlines, pline, "output.txt");
+    Array_of_string(pline, buffer, &size);
+    Sorting(pline, &nlines, choice ? recomp : strcmp_new);
+    File_Output(&nlines, pline, "output.txt");
     return 0;
 }
 
 //---------------------------------------------------------
 //! Reading a file into the array of string
 //!
-//! @param [in] f f-text file
-//! @param [out] buffer pointer to the array of string
-//! @param [out] size pointer to the size of file
+//!@param [in] f f-text file
+//!@param [out] buffer pointer to the array of string
+//!@param [out] size pointer to the size of file
 //!
-//! @return amount of lines
+//!@return amount of lines
 //!
-//! @note in case of error return code of mistakes
+//!@note in case of error return code of mistakes
 //!
 //!
 //---------------------------------------------------------
 
 
-int File_Open(FILE *f, char **buffer, long *size) {
+int File_Open(FILE *f, char *buffer, long *size) {
     fseek(f, 0, SEEK_END);
     *size = ftell(f);
     fseek(f, 0, SEEK_SET);
-    *buffer = (char *) calloc(*size + 1, sizeof(char));
-    if (*buffer == 0) {
+    buffer = (char *) calloc(*size + 1, sizeof(char));
+    if (buffer == 0) {
         fputs("error", stderr);
         return -4;
     }
@@ -94,22 +91,22 @@ int File_Open(FILE *f, char **buffer, long *size) {
     }
 
     fclose(f);
-    int nlines = Amount_of_string(*buffer, *size);
+    int nlines = Amount_of_string(buffer, *size);
     return nlines;
 }
 
 //---------------------------------------------------------
 //! counting amount of string
 //!
-//! @param [in] size size of file
-//! @param [out] buffer pointer to the array of string
+//!@param [in] size size of file
+//!@param [out] buffer pointer to the array of string
 //!
-//! @return amount of lines
+//!@return amount of lines
 //!
 //---------------------------------------------------------
 
 
-int Amount_of_string(char *buffer, long size) {
+int Amount_of_string(const char *buffer, const long size) {
     int memory = 0;
     for (long i = 0; i < size; i++)
         if (buffer[i] == '\n')
@@ -129,11 +126,11 @@ int Amount_of_string(char *buffer, long size) {
 //------------------------------------------------------------
 
 
-void Array_of_string(struct str pline[], char *buffer, long size) {
+void Array_of_string(struct str pline[], char *buffer, const long *size) {
     int pos = 0;
     int prev = 0;
     int amount = 0;
-    for (long i = 0; i < size; i++) {
+    for (long i = 0; i < *size; i++) {
         amount++;
         if (buffer[i] == '\r') {
             if (buffer[i + 1] == '\n') {
@@ -160,17 +157,17 @@ void Array_of_string(struct str pline[], char *buffer, long size) {
 //-------------------------------------------------------------------------
 //! sorting
 //!
-//! @param [out] pline array of pointer on structures
-//! @param [in] nlines amount of strings
-//! @param [in] compare pointer on function which choose methods of sorting
+//!@param [out] pline array of pointer on structures
+//!@param [in] nlines amount of strings
+//!@param [in] compare pointer on function which choose methods of sorting
 //!
-//! @return nothing
+//!@return nothing
 //!
 //-------------------------------------------------------------------------
 
-void Sorting(struct str pline[], int nlines, int (*compare)(const struct str *pline1, const struct str *pline2)) {
-    for (int i = 1; i <= nlines - 1; i++) {
-        for (int j = nlines - 1; j >= i; j--) {
+void Sorting(struct str pline[], const int *nlines, int (*compare)(const struct str *pline1, const struct str *pline2)) {
+    for (int i = 1; i <= *nlines - 1; i++) {
+        for (int j = *nlines - 1; j >= i; j--) {
             if (((*compare)((&pline[j - 1]), (&pline[j]))) > 0) {
                 str x = pline[j - 1];
                 pline[j - 1] = pline[j];
@@ -237,11 +234,11 @@ int strcmp_new(const struct str *pline1, const struct str *pline2) {
 //------------------------------------------------------------------------
 
 
-void File_Output(int nlines, struct str pline[], const char *filename) {
+void File_Output(const int *nlines, struct str pline[], const char *filename) {
 
     FILE *d = fopen(filename, "w");
 
-    for (int i = 0; i < nlines; i++) {
+    for (int i = 0; i < *nlines; i++) {
         fputs(pline[i].str, d);
         fputs("\n", d);
     }
