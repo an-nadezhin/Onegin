@@ -1,12 +1,21 @@
+//! @file main.cpp
+//! @mainpage
+//! @date 26.09.2017
+//! @author Andrew Nadezhin
+//! Sorting of Onegin by alphabet and
+
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
 #include <ctype.h>
+#include <cassert>
+
+enum {ALPHA_SORT =  1, REVERSE_SORT = 0, MISTAKE = -5};
 
 using namespace std;
 
-int File_Open(FILE *f, char *buffer, long *size);
+int File_Read(FILE *f, char *buffer, long *size);
 
 int Amount_of_string(const char *buffer, const long size);
 
@@ -18,7 +27,7 @@ void Sorting(struct str pline[], const int *nlines, int (*compare)(const struct 
 
 int recomp(const struct str *pline1, const struct str *pline2);
 
-int strcmp_new(const struct str *pline1, const struct str *pline2);
+int strcmp_helper(const struct str *pline1, const struct str *pline2);
 
 struct str {
     int len;
@@ -37,25 +46,30 @@ int main(int argc, char *argv[]) {
         cout << "error: file" << argv[1] << " not found" << endl;
         return 2;
     }
-    int choice = 0;
+    int sort_type = 0;
     if (argc == 3) {
         if (strcmp(argv[2], "-n") == 0)
-            choice = 1;
+            sort_type = ALPHA_SORT;
         else
-            choice = 0;
+            sort_type = REVERSE_SORT;
     }
     int nlines = 0;
     char *buffer = NULL;
-    long size = 0;
-    nlines = File_Open(f, buffer, &size);
+    long size = NULL;
+    nlines = File_Read(f, buffer, &size);
     if (nlines < 0) {
         cout << "Error : fileopen error number: " << nlines << endl;
         return nlines;
     }
-    struct str pline[nlines];
+    struct str *pline = (struct str*) calloc(nlines + 1, sizeof(struct str));
     Array_of_string(pline, buffer, &size);
-    Sorting(pline, &nlines, choice ? recomp : strcmp_new);
+    Sorting(pline, &nlines, sort_type ? recomp : strcmp_helper);
     File_Output(&nlines, pline, "output.txt");
+
+    free(pline);
+    free(buffer);
+    pline = NULL;
+    buffer = NULL;
     return 0;
 }
 
@@ -74,20 +88,23 @@ int main(int argc, char *argv[]) {
 //---------------------------------------------------------
 
 
-int File_Open(FILE *f, char *buffer, long *size) {
+int File_Read(FILE *f, char *buffer, long *size) {
+    assert(f);
+    assert(buffer == NULL);
+    assert(size == NULL);
     fseek(f, 0, SEEK_END);
     *size = ftell(f);
     fseek(f, 0, SEEK_SET);
     buffer = (char *) calloc(*size + 1, sizeof(char));
     if (buffer == 0) {
-        fputs("error", stderr);
-        return -4;
+        fprintf(stderr, "error : FILE__FILE : LINE__LINE : problems with allocation for buffer");
+        return MISTAKE;
     }
 
     size_t result = fread(*buffer, 1, *size, f);
     if (result != *size) {
-        fputs("error", stderr);
-        return -5;
+        fprintf(stderr, "error : FILE__FILE : LINE__LINE : problems with reading text from file to buffer");
+        return MISTAKE;
     }
 
     fclose(f);
@@ -127,6 +144,9 @@ int Amount_of_string(const char *buffer, const long size) {
 
 
 void Array_of_string(struct str pline[], char *buffer, const long *size) {
+    assert(buffer);
+    assert(size);
+    assert(pline == NULL);//??????????????????????
     int pos = 0;
     int prev = 0;
     int amount = 0;
@@ -166,6 +186,8 @@ void Array_of_string(struct str pline[], char *buffer, const long *size) {
 //-------------------------------------------------------------------------
 
 void Sorting(struct str pline[], const int *nlines, int (*compare)(const struct str *pline1, const struct str *pline2)) {
+    assert(pline);
+    assert(nlines);
     for (int i = 1; i <= *nlines - 1; i++) {
         for (int j = *nlines - 1; j >= i; j--) {
             if (((*compare)((&pline[j - 1]), (&pline[j]))) > 0) {
@@ -188,6 +210,8 @@ void Sorting(struct str pline[], const int *nlines, int (*compare)(const struct 
 //-------------------------------------------------------------------
 
 int recomp(const struct str *pline1, const struct str *pline2) {
+    assert(pline1);
+    assert(pline2);
     int l1 = pline1->len - 1;
     int l2 = pline2->len - 1;
 
@@ -217,7 +241,9 @@ int recomp(const struct str *pline1, const struct str *pline2) {
 //!
 //-------------------------------------------------------------------
 
-int strcmp_new(const struct str *pline1, const struct str *pline2) {
+int strcmp_helper(const struct str *pline1, const struct str *pline2) {
+    assert(pline1);
+    assert(pline2);
     return strcmp(pline1->str, pline2->str);
 }
 
@@ -235,6 +261,9 @@ int strcmp_new(const struct str *pline1, const struct str *pline2) {
 
 
 void File_Output(const int *nlines, struct str pline[], const char *filename) {
+    assert(nlines);
+    assert(pline);
+    assert(filename);
 
     FILE *d = fopen(filename, "w");
 
